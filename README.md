@@ -1,2 +1,2 @@
 # Nodejs-Pass 
-# must init npm 
+# must npm init
