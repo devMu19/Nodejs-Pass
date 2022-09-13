@@ -45,8 +45,6 @@ app.get ('/', (req, res,) => {
     });
 })
 
-
-app.use('/', ordersRouter)
 app.listen(3000,()=>{
     console.log('Connected Successfully...');
 });
