@@ -6,7 +6,7 @@ const app = express();
 
 app.use(express.json());
 
-let resultFromFile,listOfOrders = [],objectOfList = {},orders = [];
+let resultFromFile, listOfOrders = [], orders = [];
 
 //red from file
 resultFromFile = fs.readFileSync(`${__dirname}/orders.txt`, 'utf-8')
@@ -15,36 +15,50 @@ resultFromFile = fs.readFileSync(`${__dirname}/orders.txt`, 'utf-8')
 let splitResultFromFile = resultFromFile.split(',')
 
 //split from \n
-for(let i=0;i<splitResultFromFile.length;i++){
+for (let i = 0; i < splitResultFromFile.length; i++) {
     listOfOrders.push(splitResultFromFile[i].split('\n'))
 }
 
-// to remove \r and ''
-for(let i=0;i<listOfOrders.length;i++){
-    for (let j=0;j<listOfOrders[i].length;j++) {
-        if(listOfOrders[i][j] === '')
-        listOfOrders[i][j] = listOfOrders[i][j].replace(listOfOrders[i][j],'\r') 
+for (let i = 0; i < listOfOrders.length; i++) {
+    for (let j = 0; j < listOfOrders[i].length; j++) {
+        if (listOfOrders[i][j] === '')
+            listOfOrders[i][j] = listOfOrders[i][j].replace(listOfOrders[i][j], '\r')
     }
-    
     listOfOrders[i] = listOfOrders[i].filter(ele => {
-        return !ele.startsWith('\r') 
+        return !ele.startsWith('\r')
     })
 }
+/////////////////////////////////////////////////////
+let objectOfList = new Object(),total = 0;
 
-// add objects to the list orders
-for(let i=0;i<listOfOrders.length;i++){
-        objectOfList = {...listOfOrders[i]}
-        orders.push(objectOfList)
+for (let i = 0; i < listOfOrders.length; i++) {
+    objectOfList.name = listOfOrders[i][0];
+    let [latitude, longitude] = listOfOrders[i][1].split(' ')
+    objectOfList.address = { latitude, longitude }
+    objectOfList.items = []
+    for (let j = 0; j < listOfOrders[i][2]; j ++) {
+        let [name, count, price, total] = listOfOrders[i][3 + j].split (' ');
+        objectOfList.items.push ({ name, count, price, total});
+    }
+    let [totals , discount, totalAfterDiscount] = listOfOrders[i][listOfOrders[i].length -1 ].split (' ');
+    objectOfList.total = totals;
+    objectOfList.discount = discount;
+    objectOfList.totalAfterDiscount = totalAfterDiscount;
+    total += +totalAfterDiscount
+    console.log()
+    orders.push (objectOfList)
 }
-console.log(orders)
 
-app.get ('/', (req, res,) => {
-    
+app.get('/orders', (req, res,) => {
+
     res.status(200).json({
-        orders
+        orders,
+        total
     });
 })
 
-app.listen(3000,()=>{
+
+
+app.listen(3000, () => {
     console.log('Connected Successfully...');
 });
